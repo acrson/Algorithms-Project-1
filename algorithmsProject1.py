@@ -24,21 +24,27 @@ OTHER NOTES:
 
 # Owner option 1 - decrypt received message, show list of received messages to choose from
 # Decrypt message
-def decryptMessage():
+def decryptMsg(cyphered_message, d, n):#THIS FUNCTION
     # d = findPrivateKey()
     # Decrypt message C character by character by converting each int back to the ASCII equivalent
-    print("decrypt message")
+    message = '' # Empty string
+    for i in cyphered_message: # Loop through each char of the cyphered message.
+        i = ord(i) # Convert to ASCII
+        i = chr(pow(i, d, n)) # Decrpyt, return to char. Uses fast modular exponentiation with built in python function
+        message += i
+    print('The decyphered message is: ', message)
 
 # Owner option 2 - digitally sign a message
 # Generate digital signature
-def genDigitalSignature():
+def genDigSig(): #THIS FUNCTION
     # generate the digital signature logic
     print("generate digital signature")
 
-# Owner option 3 - show the keys
-def showKeys():
-    # show them keys
-    print("show them keys")
+# Owner option 3 - show the keys #THIS FUNCTION
+def showKeys(e, d):
+    # show both the public and private keys
+    print('Public Key:  ', e) #does this refer to just e or (e, n)?
+    print('Private Key: ', d)
 
 # Owner option 4 - generate new set of keys
 # Generate keys
@@ -84,10 +90,16 @@ def owner(choice2):
 # PUBLIC content********************************************************************************************************************
 
 #public option 1
-def sendEncryptedMsg():
+def sendEncryptedMsg(e, n): #THIS FUNCTION
     # Encrypt message M character by character by converting each char to its ASCII equivalent
-    print("send encrypted message")
-    
+    message = input('Type your message: ')
+    message = message.upper()
+    cyphered_message = '' # empty string
+    for i in message:
+        i = ord(i) # converts char to int relative to ASCII
+        i = chr(pow(i, e, n)) # encrypt, return to char. Uses fast modular exponentiation with built in python function
+        cyphered_message += i
+    print('The cyphered message is: ', cyphered_message)
 
 # public option 2 - show list of options to authenticate, if none say none
 def authenticateDigSig():
@@ -169,10 +181,17 @@ def usertype(choice1):
 # possibly a generate p and q function but idk
  
 # Finds the private key d for the public user before messasge can be decrypted
-def findPrivateKey():
-    # enough said
-    print("find the private key d")
+def findPrivateKey(phi, e): #THIS FUNCTION
+    (x, y, d) = extendedGCD(e, phi)
+    return d # Returns the private key
 
+# Use Extended Euclid's Algorithm to find (x, y, d) such that d = gcd(a, b) = ax + by
+def extendedGCD(a, b): #THIS FUNCTION
+    if b == 0:
+        return (1, 0, a)
+    (x, y, d) = extendedGCD(b, a % b)
+    return (y, (x - (a // (b * y))), d)
+    
 # MAIN content************************************************************************************************************************************
 def main():
 
