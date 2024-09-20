@@ -22,13 +22,34 @@ OTHER NOTES:
 
 # OWNER content****************************************************************************************************************************
 
-# Owner option 1
+# Owner option 1 - decrypt received message, show list of received messages to choose from
+# Decrypt message
+def decryptMessage():
+    # d = findPrivateKey()
+    # Decrypt message C character by character by converting each int back to the ASCII equivalent
+    print("decrypt message")
 
-# Owner option 2
+# Owner option 2 - digitally sign a message
+# Generate digital signature
+def genDigitalSignature():
+    # generate the digital signature logic
+    print("generate digital signature")
 
-# Owner option 3
+# Owner option 3 - show the keys
+def showKeys():
+    # show them keys
+    print("show them keys")
 
-# Owner option 4
+# Owner option 4 - generate new set of keys
+# Generate keys
+def genKeys():
+    # hi fay you can rename this to whatever you want!
+    # generate p and q, maybe here maybe with another function?
+    # find n
+    # find phi
+    # find public key e (public user AND owner of keys has access)
+    # find private key d (ONLY owner of keys has initial access)
+    print("generate keys")
 
 #owner menu!!!!!!!!!!
 def owner(choice2):
@@ -64,12 +85,14 @@ def owner(choice2):
 
 #public option 1
 def sendEncryptedMsg():
-    print("hi")
+    # Encrypt message M character by character by converting each char to its ASCII equivalent
+    print("send encrypted message")
     
 
-# public option 2
+# public option 2 - show list of options to authenticate, if none say none
 def authenticateDigSig():
-    print("hi")
+    # authentiates digital signature
+    print("authenticate digital signature")
 
 #public user menu!!!!!!
 def publicUser(choice2):
@@ -141,6 +164,14 @@ def usertype(choice1):
            choice1 = input("Invalid choice made. Please enter one of the available options: ")
            
 
+# BACK-END content****************************************************************************************
+
+# possibly a generate p and q function but idk
+ 
+# Finds the private key d for the public user before messasge can be decrypted
+def findPrivateKey():
+    # enough said
+    print("find the private key d")
 
 # MAIN content************************************************************************************************************************************
 def main():
