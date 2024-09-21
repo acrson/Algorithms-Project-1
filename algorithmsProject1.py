@@ -34,17 +34,30 @@ def decryptMsg(cyphered_message, d, n):#THIS FUNCTION
         message += i
     print('The decyphered message is: ', message)
 
+
+
 # Owner option 2 - digitally sign a message
 # Generate digital signature
-def genDigSig(): #THIS FUNCTION
-    # generate the digital signature logic
-    print("generate digital signature")
+def genDigSig(message, d, n): #THIS FUNCTION
+    signature = '' # Empty string
+    message = message.upper() # Capitalize all of the message
+    
+    for i in message: # For each character in the message string,
+        i = ord(i) # Convert current char of message to ASCII integer
+        i = chr(pow(i, d, n)) # Encrypt char using private key d
+        signature += i # Add current encrypted char to signature string
+    
+    return signature
+
+
 
 # Owner option 3 - show the keys #THIS FUNCTION
 def showKeys(e, d):
     # show both the public and private keys
     print('Public Key:  ', e) #does this refer to just e or (e, n)?
     print('Private Key: ', d)
+
+
 
 # Owner option 4 - generate new set of keys
 # Generate keys
@@ -56,6 +69,8 @@ def genKeys():
     # find public key e (public user AND owner of keys has access)
     # find private key d (ONLY owner of keys has initial access)
     print("generate keys")
+
+
 
 #owner menu!!!!!!!!!!
 def owner(choice2):
@@ -101,10 +116,25 @@ def sendEncryptedMsg(e, n): #THIS FUNCTION
         cyphered_message += i
     print('The cyphered message is: ', cyphered_message)
 
+
+
 # public option 2 - show list of options to authenticate, if none say none
-def authenticateDigSig():
-    # authentiates digital signature
-    print("authenticate digital signature")
+def authenticateDigSig(message, signature, e, n):
+    sig_message = '' # Empty string
+    authentic = False # Initialize boolean value to false by default
+    
+    for i in signature: # For each character in the signature string,
+        i = ord(i) # Convert current char of signature to ASCII integer
+        i = chr(pow(i, e, n)) # Decrypt char using public key e
+        sig_message += i # Add current decrypted char to sig_message string
+    
+    # If message and sig_message are identical, we know the signature is authentic.
+    if message == sig_message: 
+        authentic = True
+    
+    return authentic
+
+
 
 #public user menu!!!!!!
 def publicUser(choice2):
