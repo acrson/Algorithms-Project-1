@@ -19,6 +19,8 @@ OTHER NOTES:
 
 
 """
+import random
+import math
 
 # OWNER content****************************************************************************************************************************
 
@@ -61,15 +63,46 @@ def showKeys(e, d):
 
 # Owner option 4 - generate new set of keys
 # Generate keys
-def genKeys():
-    # hi fay you can rename this to whatever you want!
-    # generate p and q, maybe here maybe with another function?
-    # find n
-    # find phi
-    # find public key e (public user AND owner of keys has access)
-    # find private key d (ONLY owner of keys has initial access)
-    print("generate keys")
 
+#Checks if number is a pseudo prime number using Fermat's test
+def is_pseudoPrime(num, k = 5):
+    if num <= 1:
+        return False
+    for _ in range(k):
+        a = random.randrange(2,num)
+        if pow(a, num-1, num) != 1:
+            return False
+    return True
+
+#Generates a pseudo prime number
+def gen_pseudoPrime(bit_length):
+    while True:
+        num = random.randrange(2**(bit_length-1), 2**bit_length)
+        if is_pseudoPrime(num):
+            return num
+        
+#Generates a public key (e)
+def findPublicKey(phi):
+    e = random.randint(2,phi)
+    while math.gcd(e,phi) != 1:
+        e = random.randint(2,phi)
+    return e
+
+#Find the extended gcd
+def egcd(a, b):
+	if a == 0:
+		return (b, 0, 1)
+	else:
+		g, y, x = egcd(b % a, a)
+		return (g, x - (b // a) * y, y)
+
+#Find the modular inverse
+def modinv(a,m):
+	g,x,y = egcd(a,m)
+	if g != 1:
+		return None
+	else:
+		return x%m
 
 
 #owner menu!!!!!!!!!!
