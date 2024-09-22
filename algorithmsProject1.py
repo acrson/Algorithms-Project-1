@@ -34,19 +34,19 @@ def decryptMsg(cyphered_message, d, n):#THIS FUNCTION
         i = pow(i, d, n) # Decrpyt, return to char. Uses fast modular exponentiation with built in python function
         message += chr(i)
     print("The decyphered message is: ", message)
-
+    return message
 
 
 # Owner option 2 - digitally sign a message
 # Generate digital signature
 def genDigSig(message, d, n): #THIS FUNCTION
-    signature = "" # Empty string
+    signature = [] # Empty string
     message = message.upper() # Capitalize all of the message
     
     for i in message: # For each character in the message string,
         i = ord(i) # Convert current char of message to ASCII integer
-        i = chr(pow(i, d, n)) # Encrypt char using private key d
-        signature += i # Add current encrypted char to signature string
+        i = pow(i, d, n) # Encrypt char using private key d
+        signature.append(i) # Add current encrypted char to signature string
     
     return signature
 
@@ -107,18 +107,28 @@ def findPrivateKey(a,m):
 #owner menu!!!!!!!!!!
 def owner(choice2, message, cyphered_message, e, n, phi):
     d = findPrivateKey(e, phi) # Find the private key
+    signature = []
     
     boolsub2 = False 
     while (boolsub2 == False):
        if (choice2[0] == '1'):
            # Decrypt recieved msg
-           decryptMsg(cyphered_message, d, n)
+           message = decryptMsg(cyphered_message, d, n)
+           return message, signature, e, n, phi 
            break
             
        elif (choice2[0] == '2'):
            # digitally sign msg
-           signature = genDigSig(message, d, n)
-           break
+           
+           if (message == ""):
+               print("\nNo message to sign.")
+               break
+           
+           else:
+               signature = genDigSig(message, d, n)
+               print("Digital signature sent.\n")
+               return message, signature, e, n, phi 
+               break
            
        elif (choice2[0] == '3'):
            # show keys
@@ -136,7 +146,7 @@ def owner(choice2, message, cyphered_message, e, n, phi):
            d = findPrivateKey(e, phi)
            
            print("\nNew keys generated.\n")
-           return e, n, phi
+           return message, signature, e, n, phi 
            
            break
           
@@ -150,8 +160,8 @@ def owner(choice2, message, cyphered_message, e, n, phi):
        else:
            choice2 = input("Invalid choice made. Please enter one of the available options: ")
            
-       return e, n, phi #TRY MOVING THIS OUTSIDE OF THE WHILE LOOP
-           
+    return message, signature, e, n, phi 
+
 
 # PUBLIC content********************************************************************************************************************
 
@@ -176,7 +186,6 @@ def authenticateDigSig(message, signature, e, n):
     authentic = False # Initialize boolean value to false by default
     
     for i in signature: # For each character in the signature string,
-        i = ord(i) # Convert current char of signature to ASCII integer
         i = chr(pow(i, e, n)) # Decrypt char using public key e
         sig_message += i # Add current decrypted char to sig_message string
     
@@ -191,6 +200,8 @@ def authenticateDigSig(message, signature, e, n):
 #public user menu!!!!!!
 def publicUser(choice2, e, n, phi, message, signature):
     repeat2 = False
+    authentic = False
+    cyphered_message = ""
     
     while (repeat2 == False):
        if (choice2[0] == '1'):
@@ -199,6 +210,7 @@ def publicUser(choice2, e, n, phi, message, signature):
            message, cyphered_message = sendEncryptedMsg(e, n)
            
            print("Message encrypted and sent.")
+           #return message, cyphered_message
            
            break
                
@@ -206,7 +218,12 @@ def publicUser(choice2, e, n, phi, message, signature):
            # authenticate digital sig.
            
            # calls Pub:authenticate
-           authenticateDigSig(message, signature, e, n)
+           authentic = authenticateDigSig(message, signature, e, n)
+           
+           if authentic:
+               print("Signature is valid.")
+           else:
+               print("Signature is invalid.")
            
            break
            
@@ -218,6 +235,8 @@ def publicUser(choice2, e, n, phi, message, signature):
     
        else:
            choice2 = input("Invalid choice made. Please enter one of the available options: ")
+       
+    return message, cyphered_message
             
    
                
@@ -240,7 +259,7 @@ def usertype(choice1, e, n, phi, message, cyphered_message, signature):
                break
            
            #else:
-           publicUser(choice2, e, n, phi, message, signature)
+           message, cyphered_message = publicUser(choice2, e, n, phi, message, signature)
            
           
                
@@ -254,17 +273,22 @@ def usertype(choice1, e, n, phi, message, cyphered_message, signature):
            print("      5. Exit")
            choice2[0] = input("Enter you choice: ")
            
+           if (choice2[0] == '5'):
+               repeat1 = True
+               break
+           
            # calls for owner menu
-           e, n, phi = owner(choice2, message, cyphered_message, e, n, phi)
+           message, signature, e, n, phi = owner(choice2, message, cyphered_message, e, n, phi)
           
        elif (choice1[0] == '3'):
            # Exit program
-           #repeat1 = True   
+           repeat1 = True   
            break
     
        else:
            choice1 = input("Invalid choice made. Please enter one of the available options: ")
-       
+           
+    return message, cyphered_message, signature, e, n, phi
     
 # MAIN content************************************************************************************************************************************
 def main():
@@ -287,12 +311,15 @@ def main():
    while(repeat == True):
        print("\nPlease select your user type:")
        print("      1. A public user")
-       print("      2. Owner of key")
+       print("      2. Owner of keys")
        print("      3. Exit program")
        choice1[0] = input("Enter your choice: ")
        
        #calls  user type
-       usertype(choice1, e, n, phi, message, cyphered_message, signature)
+       message, cyphered_message, signature, e, n, phi = usertype(choice1, e, n, phi, message, cyphered_message, signature)
+       
+       #print("public key: ", e)
+
        
        if choice1[0] == '3':  # Check if exit was chosen
            #repeat = False
