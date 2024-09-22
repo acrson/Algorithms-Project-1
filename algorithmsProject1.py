@@ -29,19 +29,18 @@ import math
 def decryptMsg(cyphered_message, d, n):#THIS FUNCTION
     # d = findPrivateKey()
     # Decrypt message C character by character by converting each int back to the ASCII equivalent
-    message = '' # Empty string
+    message = "" # Empty string
     for i in cyphered_message: # Loop through each char of the cyphered message.
-        i = ord(i) # Convert to ASCII
-        i = chr(pow(i, d, n)) # Decrpyt, return to char. Uses fast modular exponentiation with built in python function
-        message += i
-    print('The decyphered message is: ', message)
+        i = pow(i, d, n) # Decrpyt, return to char. Uses fast modular exponentiation with built in python function
+        message += chr(i)
+    print("The decyphered message is: ", message)
 
 
 
 # Owner option 2 - digitally sign a message
 # Generate digital signature
 def genDigSig(message, d, n): #THIS FUNCTION
-    signature = '' # Empty string
+    signature = "" # Empty string
     message = message.upper() # Capitalize all of the message
     
     for i in message: # For each character in the message string,
@@ -56,8 +55,8 @@ def genDigSig(message, d, n): #THIS FUNCTION
 # Owner option 3 - show the keys #THIS FUNCTION
 def showKeys(e, d):
     # show both the public and private keys
-    print('Public Key:  ', e) #does this refer to just e or (e, n)?
-    print('Private Key: ', d)
+    print("Public Key:  ", e) #does this refer to just e or (e, n)?
+    print("Private Key: ", d)
 
 
 
@@ -97,7 +96,7 @@ def egcd(a, b):
 		return (g, x - (b // a) * y, y)
 
 #Find the modular inverse
-def modinv(a,m):
+def findPrivateKey(a,m):
 	g,x,y = egcd(a,m)
 	if g != 1:
 		return None
@@ -106,54 +105,74 @@ def modinv(a,m):
 
 
 #owner menu!!!!!!!!!!
-def owner(choice2):
-    boolsub2 = False
+def owner(choice2, message, cyphered_message, e, n, phi):
+    d = findPrivateKey(e, phi) # Find the private key
+    
+    boolsub2 = False 
     while (boolsub2 == False):
        if (choice2[0] == '1'):
            # Decrypt recieved msg
-           print("hi")
+           decryptMsg(cyphered_message, d, n)
+           break
             
        elif (choice2[0] == '2'):
            # digitally sign msg
-           print("hi")
+           signature = genDigSig(message, d, n)
+           break
            
        elif (choice2[0] == '3'):
-           # show key
-           print("hi")
+           # show keys
+           showKeys(e, d)
+           
+           break
            
        elif (choice2[0] == '4'):
-           # generate new key
-           print("hi")
+           # Generate new keys
+           p = gen_pseudoPrime(22)
+           q = gen_pseudoPrime(22)
+           n = p * q
+           phi = (p - 1) * (q - 1)
+           e = findPublicKey(phi)
+           d = findPrivateKey(e, phi)
+           
+           print("\nNew keys generated.\n")
+           return e, n, phi
+           
+           break
           
        elif (choice2[0] == '5'):
            # Exit menu
-           print("Bye for now!")
+           print("\nBye for now!\n")
+
            boolsub2 = True   
-           return
+           break
     
        else:
            choice2 = input("Invalid choice made. Please enter one of the available options: ")
-    
+           
+       return e, n, phi #TRY MOVING THIS OUTSIDE OF THE WHILE LOOP
+           
 
 # PUBLIC content********************************************************************************************************************
 
 #public option 1
 def sendEncryptedMsg(e, n): #THIS FUNCTION
     # Encrypt message M character by character by converting each char to its ASCII equivalent
-    message = input('Type your message: ')
+    message = input("Type your message: ")
     message = message.upper()
-    cyphered_message = '' # empty string
+    cyphered_message = [] # empty list
     for i in message:
         i = ord(i) # converts char to int relative to ASCII
-        i = chr(pow(i, e, n)) # encrypt, return to char. Uses fast modular exponentiation with built in python function
-        cyphered_message += i
-    print('The cyphered message is: ', cyphered_message)
+        i = pow(i, e, n) # encrypt, return to char. Uses fast modular exponentiation with built in python function
+        cyphered_message.append(i)
+    print("The cyphered message is: ", cyphered_message)
+    return message, cyphered_message
 
 
 
 # public option 2 - show list of options to authenticate, if none say none
 def authenticateDigSig(message, signature, e, n):
-    sig_message = '' # Empty string
+    sig_message = "" # Empty string
     authentic = False # Initialize boolean value to false by default
     
     for i in signature: # For each character in the signature string,
@@ -170,30 +189,32 @@ def authenticateDigSig(message, signature, e, n):
 
 
 #public user menu!!!!!!
-def publicUser(choice2):
-    boolsub2 = False
-    encryptedMsg = [""]
-    while (boolsub2 == False):
+def publicUser(choice2, e, n, phi, message, signature):
+    repeat2 = False
+    
+    while (repeat2 == False):
        if (choice2[0] == '1'):
-           encryptedMsg[0] = input("Enter a message: ")
            
            # calls for Pub:send encrypt
-           sendEncryptedMsg()
+           message, cyphered_message = sendEncryptedMsg(e, n)
            
            print("Message encrypted and sent.")
-           return
+           
+           break
                
        elif (choice2[0] == '2'):
            # authenticate digital sig.
            
            # calls Pub:authenticate
-           authenticateDigSig()
+           authenticateDigSig(message, signature, e, n)
+           
+           break
+           
           
        elif (choice2[0] == '3'):
            # Exit menu
-           print("Bye for now!")
-           boolsub2 = True   
-           return
+           repeat2 = True  
+           break
     
        else:
            choice2 = input("Invalid choice made. Please enter one of the available options: ")
@@ -201,10 +222,10 @@ def publicUser(choice2):
    
                
 # USER TYPE content********************************************************************************************************************
-def usertype(choice1):
-    boolsub = False
+def usertype(choice1, e, n, phi, message, cyphered_message, signature):
+    repeat1 = False
     choice2 = ['']
-    while (boolsub == False):
+    while (repeat1 == False):
        if (choice1[0] == '1'):
            # Public User
            print("\nAs a public user, what would you like to do?")
@@ -214,64 +235,68 @@ def usertype(choice1):
            choice2[0] = input("Enter you choice: ")
            
            # calls for public user menu
-           publicUser(choice2)
+           if (choice2[0] == '3'):
+               repeat1 = True
+               break
+           
+           #else:
+           publicUser(choice2, e, n, phi, message, signature)
+           
+          
                
        elif (choice1[0] == '2'):
            # Owner of key
            print("\nAs the Owner of the Keys, what would you like to do?")
            print("      1. Decrypt a received message")
            print("      2. Digitally sign a message")
-           print("      3. Show key")
+           print("      3. Show keys")
            print("      4. Generate new set of key")
            print("      5. Exit")
            choice2[0] = input("Enter you choice: ")
            
            # calls for owner menu
-           owner(choice2)
+           e, n, phi = owner(choice2, message, cyphered_message, e, n, phi)
           
        elif (choice1[0] == '3'):
            # Exit program
-           print("Bye for now!")
-           boolsub = True   
-           return
+           #repeat1 = True   
+           break
     
        else:
            choice1 = input("Invalid choice made. Please enter one of the available options: ")
-           
-
-# BACK-END content****************************************************************************************
-
-# possibly a generate p and q function but idk
- 
-# Finds the private key d for the public user before messasge can be decrypted
-def findPrivateKey(phi, e): #THIS FUNCTION
-    (x, y, d) = extendedGCD(e, phi)
-    return d # Returns the private key
-
-# Use Extended Euclid's Algorithm to find (x, y, d) such that d = gcd(a, b) = ax + by
-def extendedGCD(a, b): #THIS FUNCTION
-    if b == 0:
-        return (1, 0, a)
-    (x, y, d) = extendedGCD(b, a % b)
-    return (y, (x - (a // (b * y))), d)
+       
     
 # MAIN content************************************************************************************************************************************
 def main():
 
-   bool = False
+   repeat = True
    choice1 = ['']
-   while(bool == False):
-       print("\nRSA keys have been generated.\nPlease select your user type:")
+   
+   # Variable declaration
+   p = gen_pseudoPrime(22)
+   q = gen_pseudoPrime(22)
+   n = p * q
+   phi = (p - 1) * (q - 1)
+   e = findPublicKey(phi)
+   message = ""
+   cyphered_message = ""
+   signature = ""
+   
+   print("\nRSA keys have been generated.")
+   
+   while(repeat == True):
+       print("\nPlease select your user type:")
        print("      1. A public user")
        print("      2. Owner of key")
        print("      3. Exit program")
        choice1[0] = input("Enter your choice: ")
        
        #calls  user type
-       usertype(choice1)
+       usertype(choice1, e, n, phi, message, cyphered_message, signature)
        
        if choice1[0] == '3':  # Check if exit was chosen
-            break
+           #repeat = False
+           break
  
 # call main function
 if __name__ == "__main__":
