@@ -209,7 +209,7 @@ def sendEncryptedMsg(e, n):
         i = pow(i, e, n) # Encrypt, return to char. Uses fast modular exponentiation with built in python function
         cyphered_message.append(i)
         
-    return message, cyphered_message
+    return cyphered_message
 
 
 
